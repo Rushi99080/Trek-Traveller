@@ -27,8 +27,8 @@ sql += "\n";
 for (const t of getSampleTrips()) {
   const id = randomUUID();
   const leaders = t.leaderIds.map((x) => leaderMap.get(x)!).filter(Boolean);
-  sql += `insert into trips (id, slug, name, location, region, categories, duration_days, duration_label, difficulty, altitude, distance, best_season, short_description, overview, highlights, itinerary, inclusions, exclusions, things_to_carry, fitness, meeting_points, pickup_prices, stay_options, payment_mode, advance_amount, group_discount, images, leader_ids, faqs, popularity, is_published, sort_order) values (
-  ${q(id)}, ${q(t.slug)}, ${q(t.name)}, ${q(t.location)}, ${q(t.region)}, ${arr(t.categories)}, ${t.durationDays}, ${q(t.durationLabel)}, ${q(t.difficulty)}, ${q(t.altitude)}, ${q(t.distance)}, ${q(t.bestSeason)}, ${q(t.shortDescription)}, ${q(t.overview)},
+  sql += `insert into trips (id, slug, name, location, region, latitude, longitude, categories, duration_days, duration_label, difficulty, altitude, distance, best_season, short_description, overview, highlights, itinerary, inclusions, exclusions, things_to_carry, fitness, meeting_points, pickup_prices, stay_options, payment_mode, advance_amount, group_discount, images, leader_ids, faqs, popularity, is_published, sort_order) values (
+  ${q(id)}, ${q(t.slug)}, ${q(t.name)}, ${q(t.location)}, ${q(t.region)}, ${q(t.latitude)}, ${q(t.longitude)}, ${arr(t.categories)}, ${t.durationDays}, ${q(t.durationLabel)}, ${q(t.difficulty)}, ${q(t.altitude)}, ${q(t.distance)}, ${q(t.bestSeason)}, ${q(t.shortDescription)}, ${q(t.overview)},
   ${json(t.highlights)}, ${json(t.itinerary)}, ${json(t.inclusions)}, ${json(t.exclusions)}, ${json(t.thingsToCarry)}, ${q(t.fitness)}, ${json(t.meetingPoints)}, ${json(t.pickupPrices)}, ${json(t.stayOptions)},
   ${q(t.paymentMode)}, ${t.advanceAmount}, ${t.groupDiscount ? json(t.groupDiscount) : "null"}, ${json(t.images)}, ${arr(leaders, "uuid")}, ${json(t.faqs)}, ${t.popularity}, true, ${t.sortOrder}
 ) on conflict (slug) do nothing;\n`;

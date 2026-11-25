@@ -23,6 +23,8 @@ create table if not exists trips (
   name text not null,
   location text default '',
   region text default '',
+  latitude double precision,
+  longitude double precision,
   categories text[] default '{}',
   duration_days int default 1,
   duration_label text default '',
@@ -53,6 +55,10 @@ create table if not exists trips (
   created_at timestamptz default now(),
   updated_at timestamptz default now()
 );
+
+-- Added in v1.1 (safe to run on an existing database)
+alter table trips add column if not exists latitude double precision;
+alter table trips add column if not exists longitude double precision;
 
 -- ---------- Batches (dates) ----------
 create table if not exists batches (

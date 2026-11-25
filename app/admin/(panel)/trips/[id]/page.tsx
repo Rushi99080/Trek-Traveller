@@ -9,6 +9,8 @@ const blank: Trip = {
   name: "",
   location: "",
   region: "",
+  latitude: null,
+  longitude: null,
   categories: ["weekend-treks"],
   durationDays: 1,
   durationLabel: "1 day",

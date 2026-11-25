@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { CalendarDays, CheckCircle2, Clock, Copy, ExternalLink, FileText, Hourglass, MapPin, Printer, Users } from "lucide-react";
+import { CalendarDays, Clock, Copy, ExternalLink, FileText, Hourglass, MapPin, Printer, Users } from "lucide-react";
 import { useState } from "react";
 import { dateRange, inr } from "@/lib/format";
 import { site, whatsappLink } from "@/site.config";
 import { WhatsAppIcon } from "../WhatsAppButton";
 import { useBooking } from "./useBooking";
+import SummitCelebration from "./SummitCelebration";
 
 export default function BookingConfirmation() {
   const id = useSearchParams().get("id");
@@ -37,7 +38,7 @@ export default function BookingConfirmation() {
   return (
     <div className="mx-auto max-w-2xl">
       <div className={`rounded-card p-6 text-center sm:p-8 ${waitlist || pending ? "bg-amber-50 ring-1 ring-amber-200" : "bg-forest-800 text-white"}`}>
-        {waitlist || pending ? <Hourglass size={44} className="mx-auto text-amber-600" /> : <CheckCircle2 size={48} className="mx-auto text-sunset-300" />}
+        {waitlist || pending ? <Hourglass size={44} className="mx-auto text-amber-600" /> : <SummitCelebration />}
         <h1 className={`mt-3 text-3xl font-extrabold sm:text-4xl ${waitlist || pending ? "" : "text-white"}`}>
           {waitlist ? "You're on the waitlist" : pending ? "Payment pending" : "You're going!"}
         </h1>

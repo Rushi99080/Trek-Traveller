@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Menu, Phone, X } from "lucide-react";
 import Logo from "./Logo";
+import TrailProgress from "./TrailProgress";
 import { site } from "@/site.config";
 
 const links = [
@@ -53,6 +54,7 @@ export default function Header() {
           {open ? <X size={26} /> : <Menu size={26} />}
         </button>
       </div>
+      <TrailProgress />
 
       {open && (
         <div className="fixed inset-x-0 bottom-0 top-16 z-40 flex flex-col bg-mist px-4 pb-8 pt-4 md:hidden">

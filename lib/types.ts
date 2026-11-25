@@ -72,6 +72,9 @@ export interface Trip {
   name: string;
   location: string;
   region: string;
+  /** Map position (used for the "How far is your weekend?" radar) */
+  latitude: number | null;
+  longitude: number | null;
   categories: CategorySlug[];
   durationDays: number;
   durationLabel: string;

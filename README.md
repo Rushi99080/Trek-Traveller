@@ -11,7 +11,7 @@ Built with Next.js, Tailwind CSS, Supabase (database) and Razorpay (payments). H
 
 | Page | Address |
 |---|---|
-| Home (hero + search, this weekend, categories, why us, stats, reviews, solo travellers, Instagram, FAQ) | `/` |
+| Home: live hero (sky follows the real time in Pune, countdown to the next group), split-flap departure board, "How far is your weekend?" radar from Pune, categories, why us with odometer stats, reviews, solo-to-crew campfire animation, Instagram, FAQ | `/` |
 | All trips with filters and sorting | `/treks` |
 | Trip detail (gallery, batches, prices, itinerary, inclusions, packing list, pickup points, leaders, policy, FAQs, sticky Book Now bar) | `/treks/rajgad-fort-trek` |
 | Printable itinerary (Save as PDF) | `/treks/rajgad-fort-trek/itinerary` |
@@ -58,7 +58,7 @@ Anything in `[square brackets]` is a placeholder — search for `[` to find them
 ## Step 2 — Connect the database (Supabase, free)
 
 1. Create an account at **supabase.com** → **New project** (region: Mumbai). Save the database password somewhere safe.
-2. Open **SQL Editor → New query**, paste everything from `supabase/schema.sql`, press **Run**.
+2. Open **SQL Editor → New query**, paste everything from `supabase/schema.sql`, press **Run**. (Safe to run again after updates — it only adds what's missing.)
 3. New query again, paste everything from `supabase/seed.sql`, press **Run**. This loads the 8 sample trips (dates start 28 Nov 2026 — change them in Admin).
 4. Go to **Project Settings → API** and copy:
    - Project URL → `NEXT_PUBLIC_SUPABASE_URL`
@@ -113,6 +113,7 @@ Vercel → **Project → Settings → Domains** → add `yourcompany.com` and fo
 Go to `yourwebsite.com/admin` and log in with `ADMIN_PASSWORD`.
 
 - **Add a trip:** Trips & batches → Add trip. Fill the sections, add batches, upload photos, Save. The trip appears on the website within a minute.
+- **Show a trip on the homepage radar:** in the trip's Basic details, fill **Map location** — on Google Maps, long-press the place and paste the numbers (e.g. `18.2465, 73.6823`).
 - **Copy a trip:** Duplicate creates a hidden copy without dates — edit it and tick "Show this trip on the website".
 - **Add dates:** open a trip → Batches → Add batch. Paste the trip WhatsApp group link on each batch; travellers get it after paying.
 - **Seats:** "Booked" goes up automatically after each payment. When a batch is full it switches to waitlist. Change "Booked" only to add offline bookings.

@@ -1,50 +1,95 @@
 import Link from "next/link";
 import { BadgeIndianRupee, Bus, Compass, Search, ShieldPlus, Star, Users } from "lucide-react";
-
-const whyIcons = { Compass, ShieldPlus, Users, Bus, BadgeIndianRupee };
 import { getTrips } from "@/lib/data";
-import { monthKey, monthLabel, seatsLeft, todayISO, toISODate, upcomingBatches } from "@/lib/format";
+import { batchDisplayStatus, dateRange, fromPrice, inr, monthKey, monthLabel, nextBatch, seatsLeft, toISODate, upcomingBatches } from "@/lib/format";
+import { compass, departureTime, fromPune } from "@/lib/geo";
 import { categories, hero, homeFaqs, instagramTiles, reviews, soloSteps, whyUs } from "@/data/content";
 import { site, whatsappLink } from "@/site.config";
-import TripCard from "@/components/TripCard";
 import Img from "@/components/Img";
-import StatsCounter from "@/components/StatsCounter";
 import FaqList from "@/components/FaqList";
 import JsonLd from "@/components/JsonLd";
 import { InstagramIcon } from "@/components/SocialIcons";
 import { WhatsAppIcon } from "@/components/WhatsAppButton";
+import LiveHero, { type NextDeparture } from "@/components/home/LiveHero";
+import DepartureBoard, { type BoardRow } from "@/components/home/DepartureBoard";
+import TripRadar, { type RadarPoint } from "@/components/home/TripRadar";
+import SoloToCrew from "@/components/home/SoloToCrew";
+import OdometerStats from "@/components/home/OdometerStats";
 
 export const revalidate = 60;
 
+const whyIcons = { Compass, ShieldPlus, Users, Bus, BadgeIndianRupee };
+
 function nextMonths(n: number) {
   const d = new Date();
-  d.setDate(1);
   return Array.from({ length: n }, (_, i) => {
-    const x = new Date(d.getFullYear(), d.getMonth() + i, 1);
-    const key = monthKey(toISODate(x));
+    const key = monthKey(toISODate(new Date(d.getFullYear(), d.getMonth() + i, 1)));
     return { key, label: monthLabel(key) };
   });
 }
 
+const IST = "Asia/Kolkata";
+const fmt = (d: Date, o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat("en-GB", { timeZone: IST, ...o }).format(d);
+
+/** Short board name: drop words from the end until it fits 20 characters */
+function boardName(name: string) {
+  const words = name.toUpperCase().split(" ");
+  while (words.join(" ").length > 20 && words.length > 1) words.pop();
+  return words.join(" ").slice(0, 20);
+}
+
 export default async function HomePage() {
   const trips = await getTrips();
+  const now = Date.now();
 
-  // Trips leaving in the next 7 days; if none, the next few departures
-  const today = todayISO();
-  const weekEnd = new Date();
-  weekEnd.setDate(weekEnd.getDate() + 7);
-  const limit = toISODate(weekEnd);
+  // ---------- Departures (for the hero countdown and the board) ----------
   const departures = trips
-    .flatMap((t) => upcomingBatches(t).map((b) => ({ trip: t, batch: b })))
-    .sort((a, b) => a.batch.startDate.localeCompare(b.batch.startDate));
-  const thisWeek = departures.filter((d) => d.batch.startDate >= today && d.batch.startDate <= limit);
-  // Only dates people can still book; fall back to the next departures if this weekend is full
-  const open = (d: (typeof departures)[number]) => seatsLeft(d.batch) > 0 && d.batch.status !== "waitlist" && d.batch.status !== "sold_out";
-  const thisWeekOpen = thisWeek.filter(open);
-  const railItems = (thisWeekOpen.length >= 2 ? thisWeekOpen : departures.filter(open)).filter(
-    (d, i, arr) => arr.findIndex((x) => x.trip.id === d.trip.id) === i,
-  );
-  const railTrips = railItems.slice(0, 8).map((d) => d.trip);
+    .flatMap((t) =>
+      upcomingBatches(t).map((b) => {
+        const pickup = t.meetingPoints.find((m) => m.city === "Pune") ?? t.meetingPoints[0];
+        return { trip: t, batch: b, at: departureTime(b.startDate, pickup?.time), status: batchDisplayStatus(b) };
+      }),
+    )
+    .filter((d) => d.status !== "Sold Out" && d.at.getTime() > now)
+    .sort((a, b) => a.at.getTime() - b.at.getTime());
+
+  const firstOpen = departures.find((d) => d.status !== "Waitlist");
+  const next: NextDeparture | null = firstOpen
+    ? { tripName: firstOpen.trip.name, href: `/book/${firstOpen.trip.slug}?batch=${firstOpen.batch.id}`, departAt: firstOpen.at.toISOString(), seatsLeft: seatsLeft(firstOpen.batch) }
+    : null;
+
+  const board: BoardRow[] = departures.slice(0, 6).map((d) => ({
+    id: d.batch.id,
+    date: fmt(d.at, { weekday: "short", day: "2-digit", month: "short" }).replace(",", "").toUpperCase(),
+    time: fmt(d.at, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }),
+    destination: boardName(d.trip.name),
+    fullName: d.trip.name,
+    seats: seatsLeft(d.batch),
+    status: d.status as BoardRow["status"],
+    href: `/book/${d.trip.slug}?batch=${d.batch.id}`,
+  }));
+
+  // ---------- Radar ----------
+  const radar: RadarPoint[] = trips
+    .filter((t) => t.latitude != null && t.longitude != null)
+    .map((t) => {
+      const { km, bearing } = fromPune(t.latitude!, t.longitude!);
+      const nb = nextBatch(t);
+      return {
+        id: t.id,
+        name: t.name,
+        km,
+        bearing,
+        direction: compass(bearing),
+        difficulty: t.difficulty,
+        durationLabel: t.durationLabel,
+        image: t.images[0] ?? "",
+        next: nb ? `Next: ${dateRange(nb.startDate, nb.endDate)}` : "New dates coming soon",
+        price: inr(fromPrice(t)),
+        href: `/treks/${t.slug}`,
+        bookHref: nb ? `/book/${t.slug}?batch=${nb.id}` : `/treks/${t.slug}`,
+      };
+    });
 
   return (
     <>
@@ -61,26 +106,9 @@ export default async function HomePage() {
         }}
       />
 
-      {/* ---------- Hero ---------- */}
+      {/* ---------- Live hero ---------- */}
       <section className="relative">
-        <div className="relative min-h-[31rem] overflow-hidden bg-forest-900 sm:min-h-[38rem] lg:min-h-[42rem]">
-          <Img src="/images/trips/hero.svg" alt="Sahyadri ridges at sunrise with a fort on the skyline" priority sizes="100vw" className="object-cover object-[30%_50%]" />
-          <div className="absolute inset-0 bg-gradient-to-t from-forest-900/90 via-forest-900/30 to-transparent" />
-          <div className="container-site relative flex min-h-[31rem] flex-col justify-end pb-24 pt-20 sm:min-h-[38rem] lg:min-h-[42rem] lg:pb-36">
-            <h1 className="max-w-3xl text-[2.4rem] font-extrabold leading-[1.02] text-white sm:text-6xl lg:text-7xl">{hero.headline}</h1>
-            <p className="mt-4 max-w-xl text-[17px] leading-relaxed text-forest-50/90 sm:text-lg">{hero.subheadline}</p>
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link href="/treks" className="btn-primary px-6">
-                Explore trips
-              </Link>
-              <Link href="/plan-a-trip" className="btn-ghost-light px-6">
-                Plan a custom trip
-              </Link>
-            </div>
-          </div>
-        </div>
-
-        {/* Search */}
+        <LiveHero headline={hero.headline} subheadline={hero.subheadline} next={next} />
         <div className="container-site relative -mt-20 lg:-mt-24">
           <form action="/treks" method="get" className="card grid gap-3 p-4 shadow-xl shadow-forest-900/10 sm:grid-cols-[1.4fr_1fr_1fr_auto] sm:items-end sm:p-5">
             <div>
@@ -114,29 +142,33 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ---------- This weekend ---------- */}
-      <section className="container-site mt-14">
-        <div className="mb-5 flex items-end justify-between gap-4">
-          <div>
-            <h2 className="section-title">{thisWeekOpen.length >= 2 ? "Leaving this weekend" : "Coming up next"}</h2>
-            <p className="mt-1 text-mountain-500">Seats are limited. Book in under 2 minutes.</p>
+      {/* ---------- Departure board ---------- */}
+      {board.length > 0 && (
+        <section className="container-site mt-14">
+          <div className="mb-5 flex items-end justify-between gap-4">
+            <div>
+              <h2 className="section-title">Leaving soon</h2>
+              <p className="mt-1 text-mountain-500">Live seat count. Tap a departure to book your seat.</p>
+            </div>
+            <Link href="/treks" className="hidden shrink-0 font-semibold text-forest-700 hover:text-forest-900 sm:block">
+              See all trips
+            </Link>
           </div>
-          <Link href="/treks" className="hidden shrink-0 font-semibold text-forest-700 hover:text-forest-900 sm:block">
-            See all trips
-          </Link>
-        </div>
-        <div className="rail">
-          {railTrips.map((t) => (
-            <TripCard key={t.id} trip={t} compact />
-          ))}
-        </div>
-        <Link href="/treks" className="btn-outline mt-4 w-full sm:hidden">
-          See all trips
-        </Link>
-      </section>
+          <DepartureBoard rows={board} />
+        </section>
+      )}
+
+      {/* ---------- Radar ---------- */}
+      {radar.length > 0 && (
+        <section className="container-site mt-20">
+          <h2 className="section-title">How far is your weekend?</h2>
+          <p className="mb-6 mt-1 max-w-xl text-mountain-500">Every trip plotted from Pune at its real distance and direction. Tap a dot to see the trip.</p>
+          <TripRadar points={radar} />
+        </section>
+      )}
 
       {/* ---------- Categories ---------- */}
-      <section className="container-site mt-16">
+      <section className="container-site mt-20">
         <h2 className="section-title">Pick your kind of adventure</h2>
         <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
           {categories.map((c, i) => (
@@ -145,9 +177,9 @@ export default async function HomePage() {
               href={c.slug === "corporate-trips" ? "/plan-a-trip?type=Corporate" : `/treks?type=${c.slug}`}
               className={`group relative flex aspect-[4/3] items-end overflow-hidden rounded-card bg-forest-800 p-4 ${i === 0 ? "col-span-2 aspect-[2/1] lg:col-span-1 lg:aspect-[4/3]" : ""}`}
             >
-              <Img src={c.image} alt="" sizes="(max-width: 640px) 50vw, 33vw" className="object-cover transition-transform duration-500 group-hover:scale-105" />
+              <Img src={c.image} alt="" sizes="(max-width: 640px) 50vw, 33vw" className="object-cover transition-transform duration-700 group-hover:scale-110" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-              <div className="relative">
+              <div className="relative transition-transform duration-300 group-hover:-translate-y-1">
                 <h3 className="text-lg font-bold leading-tight text-white sm:text-xl">{c.label}</h3>
                 <p className="mt-0.5 text-[13px] text-white/80 sm:text-sm">{c.blurb}</p>
               </div>
@@ -184,7 +216,7 @@ export default async function HomePage() {
             </ul>
           </div>
           <div className="mt-14 border-t border-white/15 pt-10">
-            <StatsCounter stats={site.stats} />
+            <OdometerStats stats={site.stats} />
           </div>
         </div>
       </section>
@@ -210,35 +242,23 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ---------- Solo travellers + community ---------- */}
+      {/* ---------- Solo → crew ---------- */}
       <section className="container-site mt-16">
-        <div className="overflow-hidden rounded-[1.75rem] bg-sunset-50 ring-1 ring-sunset-100">
-          <div className="grid gap-8 p-6 sm:p-10 lg:grid-cols-[1fr_1.2fr] lg:items-center">
+        <div className="overflow-hidden rounded-[1.75rem] bg-[#0B1626] p-5 sm:p-10">
+          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h2 className="section-title">Travelling solo? You won&apos;t be for long.</h2>
-              <p className="mt-3 text-lg leading-relaxed text-mountain-700">
-                Most people on our trips come alone. Here&apos;s how you go from stranger to trek buddy.
-              </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <a href={site.whatsappCommunity} target="_blank" rel="noopener noreferrer" className="btn bg-[#25D366] text-white hover:bg-[#1fb757]">
-                  <WhatsAppIcon className="h-5 w-5" /> Join our WhatsApp community
-                </a>
-                <a href={site.instagram} target="_blank" rel="noopener noreferrer" className="btn-outline">
-                  <InstagramIcon /> {site.instagramHandle}
-                </a>
-              </div>
+              <h2 className="section-title text-white">Travelling solo? You won&apos;t be for long.</h2>
+              <p className="mt-2 max-w-xl text-lg leading-relaxed text-forest-100/80">Most people on our trips come alone. Scroll and watch how that changes.</p>
             </div>
-            <ol className="grid gap-4">
-              {soloSteps.map((s, i) => (
-                <li key={s.title} className="flex gap-4 rounded-2xl bg-white p-4 ring-1 ring-sunset-100">
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-sunset-500 font-display font-bold text-white">{i + 1}</span>
-                  <div>
-                    <h3 className="font-display text-lg font-semibold">{s.title}</h3>
-                    <p className="mt-0.5 text-[15px] leading-relaxed text-mountain-600">{s.text}</p>
-                  </div>
-                </li>
-              ))}
-            </ol>
+          </div>
+          <SoloToCrew steps={soloSteps} />
+          <div className="mt-6 flex flex-wrap gap-3">
+            <a href={site.whatsappCommunity} target="_blank" rel="noopener noreferrer" className="btn bg-[#25D366] text-white hover:bg-[#1fb757]">
+              <WhatsAppIcon className="h-5 w-5" /> Join our WhatsApp community
+            </a>
+            <a href={site.instagram} target="_blank" rel="noopener noreferrer" className="btn-ghost-light">
+              <InstagramIcon /> {site.instagramHandle}
+            </a>
           </div>
         </div>
       </section>
@@ -248,9 +268,7 @@ export default async function HomePage() {
         <div className="flex flex-col gap-5 rounded-card border border-mountain-100 bg-white p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
           <div>
             <h2 className="text-2xl font-bold sm:text-3xl">Planning for your office, college or family?</h2>
-            <p className="mt-2 max-w-xl text-mountain-600">
-              Tell us your group size, dates and budget. We&apos;ll send a plan and a quote within a day.
-            </p>
+            <p className="mt-2 max-w-xl text-mountain-600">Tell us your group size, dates and budget. We&apos;ll send a plan and a quote within a day.</p>
           </div>
           <Link href="/plan-a-trip" className="btn-forest shrink-0 px-6">
             Plan a custom trip

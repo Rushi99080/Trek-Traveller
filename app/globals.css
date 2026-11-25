@@ -75,6 +75,31 @@
   }
 }
 
+/* Smooth colour change of the live sky */
+.hero-stop {
+  transition: stop-color 2s ease, stop-opacity 2s ease;
+}
+
+/* Split-flap tiles on the departure board */
+.flap-tile {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 0.78em;
+  height: 1.3em;
+  margin-right: 1px;
+  border-radius: 3px;
+  background: linear-gradient(#1b2a22 0 49%, #0d1712 49% 51%, #16241d 51% 100%);
+  color: #f3efe2;
+  font-weight: 700;
+  transform-origin: 50% 50%;
+  perspective: 300px;
+}
+.flap-tile.space {
+  background: linear-gradient(#15221b 0 49%, #0a130f 49% 51%, #121e18 51% 100%);
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -83,6 +108,7 @@
   *::before,
   *::after {
     animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
 }

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 import Logo from "./Logo";
+import SummitRidge from "./SummitRidge";
 import { site, whatsappLink } from "@/site.config";
 import { categories } from "@/data/content";
 import { FacebookIcon, InstagramIcon, YoutubeIcon } from "./SocialIcons";
@@ -9,7 +10,9 @@ import { WhatsAppIcon } from "./WhatsAppButton";
 export default function Footer() {
   const year = new Date().getFullYear();
   return (
-    <footer className="no-print mt-20 bg-forest-900 text-forest-100">
+    <footer className="no-print mt-20 text-forest-100">
+      <SummitRidge />
+      <div className="bg-forest-900">
       <div className="container-site grid gap-10 py-14 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div>
           <Logo light />
@@ -84,6 +87,7 @@ export default function Footer() {
           <p>© {year} {site.legalName}. All rights reserved.</p>
           <p>GSTIN: {site.gstin}</p>
         </div>
+      </div>
       </div>
     </footer>
   );

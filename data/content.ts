@@ -22,9 +22,9 @@ export function categoryLabel(slug: string) {
 }
 
 export const hero = {
-  headline: "Weekend treks from Pune & Mumbai. Come solo, leave with a crew.",
+  headline: "Come solo. Leave with a crew.",
   subheadline:
-    "Sahyadri forts, monsoon waterfalls, lakeside camps and Himalayan summits — with trained trek leaders, transport and meals sorted.",
+    "Weekend treks, night treks and lakeside camps from Pune & Mumbai — trek leaders, transport and food sorted.",
 };
 
 export const whyUs = [
