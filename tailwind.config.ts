@@ -46,12 +46,12 @@ const config: Config = {
           600: "#D15412",
           700: "#AC4211",
         },
-        // Off-white page background (a cool, misty white)
-        mist: "#F5F6F2",
+        // Light grey section background
+        mist: "#F3F4F1",
       },
       fontFamily: {
-        display: ['"Bricolage Grotesque Variable"', "system-ui", "sans-serif"],
-        sans: ['"Figtree Variable"', "system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"],
+        display: ['"Plus Jakarta Sans Variable"', "system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"],
+        sans: ['"Plus Jakarta Sans Variable"', "system-ui", "-apple-system", "Segoe UI", "Roboto", "sans-serif"],
       },
       borderRadius: {
         card: "1.25rem",

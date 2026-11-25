@@ -57,20 +57,20 @@ export default function OdometerStats({ stats }: { stats: Stat[] }) {
   }, []);
 
   return (
-    <dl ref={ref} className="grid grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-4">
+    <dl ref={ref} className="grid grid-cols-2 gap-y-8 sm:grid-cols-4 sm:divide-x sm:divide-mountain-200">
       {stats.map((s, idx) => {
         const text = s.decimals ? s.value.toFixed(s.decimals) : Math.round(s.value).toLocaleString("en-IN");
         return (
-          <div key={s.label} className="flex flex-col-reverse">
-            <dt className="mt-2 text-[15px] text-forest-200">{s.label}</dt>
-            <dd className="font-display text-4xl font-bold tabular-nums text-white sm:text-5xl">
+          <div key={s.label} className="flex flex-col-reverse items-center px-2 text-center">
+            <dt className="mt-2 text-[13px] leading-snug text-mountain-500 sm:text-sm">{s.label}</dt>
+            <dd className="font-display text-[2.4rem] font-extrabold leading-none tracking-tight text-forest-900 sm:text-5xl">
               <span className="sr-only">
                 {text}
                 {s.suffix}
               </span>
-              <span className="inline-flex items-end rounded-xl bg-black/25 px-2.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,.08)]">
+              <span className="inline-flex items-end">
                 <Digits text={text} on={on} delay={idx * 150} />
-                <span className="ml-0.5 text-sunset-300" aria-hidden="true">
+                <span className="text-sunset-500" aria-hidden="true">
                   {s.suffix}
                 </span>
               </span>

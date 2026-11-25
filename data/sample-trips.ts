@@ -6,6 +6,7 @@
  */
 import { toISODate } from "@/lib/format";
 import type { Batch, Leader, Trip } from "@/lib/types";
+import { photos as P } from "./photos";
 
 // ---------- date helpers so demo dates are always upcoming ----------
 const DOW = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 } as const;
@@ -187,7 +188,7 @@ export function getSampleTrips(): Trip[] {
       paymentMode: "full",
       advanceAmount: 0,
       groupDiscount: { minPeople: 5, percent: 5 },
-      images: ["/images/trips/rajgad-fort-trek-1.svg", "/images/trips/rajgad-fort-trek-2.svg", "/images/trips/rajgad-fort-trek-3.svg"],
+      images: [P.fortRidge, P.greenMountains, P.greenValley],
       leaderIds: ["leader-1", "leader-2"],
       faqs: [
         { q: "Is Rajgad OK for a first-time trekker?", a: "If you're reasonably active, yes. The climb is long and has a few rocky patches, so take your time and the leaders will help." },
@@ -287,7 +288,7 @@ export function getSampleTrips(): Trip[] {
       paymentMode: "advance",
       advanceAmount: 1000,
       groupDiscount: { minPeople: 5, percent: 5 },
-      images: ["/images/trips/harishchandragad-trek-1.svg", "/images/trips/harishchandragad-trek-2.svg", "/images/trips/harishchandragad-trek-3.svg"],
+      images: [P.monsoonPeak, P.hillsTrees, P.tentStars],
       leaderIds: ["leader-1", "leader-2"],
       faqs: defaultFaqs,
       popularity: 90,
@@ -370,7 +371,7 @@ export function getSampleTrips(): Trip[] {
       paymentMode: "full",
       advanceAmount: 0,
       groupDiscount: { minPeople: 5, percent: 5 },
-      images: ["/images/trips/kalsubai-night-trek-1.svg", "/images/trips/kalsubai-night-trek-2.svg", "/images/trips/kalsubai-night-trek-3.svg"],
+      images: [P.dryPeak, P.ghatSunset, P.sunriseSummit],
       leaderIds: ["leader-2"],
       faqs: [
         { q: "Is a night trek safe?", a: "Yes, with the right group. Our leaders walk at the front and back, everyone carries a headlamp, and we take a well-used route with regular breaks." },
@@ -448,7 +449,7 @@ export function getSampleTrips(): Trip[] {
       paymentMode: "full",
       advanceAmount: 0,
       groupDiscount: { minPeople: 5, percent: 5 },
-      images: ["/images/trips/andharban-jungle-trek-1.svg", "/images/trips/andharban-jungle-trek-2.svg", "/images/trips/andharban-jungle-trek-3.svg"],
+      images: [P.waterfall, P.forestRoad, P.greenRange],
       leaderIds: ["leader-1"],
       faqs: defaultFaqs,
       popularity: 80,
@@ -537,7 +538,7 @@ export function getSampleTrips(): Trip[] {
       paymentMode: "advance",
       advanceAmount: 500,
       groupDiscount: { minPeople: 6, percent: 8 },
-      images: ["/images/trips/pawna-lake-camping-1.svg", "/images/trips/pawna-lake-camping-2.svg", "/images/trips/pawna-lake-camping-3.svg"],
+      images: [P.lakeMountains, P.tentsForest, P.tentTreeNight],
       leaderIds: ["leader-2"],
       faqs: [
         { q: "Can we bring kids?", a: "Yes. Kids above 5 years are welcome. Children under 5 come free when sharing a tent with parents." },
@@ -635,7 +636,7 @@ export function getSampleTrips(): Trip[] {
       paymentMode: "advance",
       advanceAmount: 3000,
       groupDiscount: { minPeople: 4, percent: 5 },
-      images: ["/images/trips/hampi-backpacking-trip-1.svg", "/images/trips/hampi-backpacking-trip-2.svg", "/images/trips/hampi-backpacking-trip-3.svg"],
+      images: [P.hampiChariot, P.hampiRuins, P.hampiRiver],
       leaderIds: ["leader-1"],
       faqs: defaultFaqs,
       popularity: 85,
@@ -725,7 +726,7 @@ export function getSampleTrips(): Trip[] {
       paymentMode: "advance",
       advanceAmount: 2500,
       groupDiscount: { minPeople: 4, percent: 5 },
-      images: ["/images/trips/gokarna-beach-trek-1.svg", "/images/trips/gokarna-beach-trek-2.svg", "/images/trips/gokarna-beach-trek-3.svg"],
+      images: [P.gokarnaCliffs, P.gokarnaCoast, P.beachSunset],
       leaderIds: ["leader-2"],
       faqs: defaultFaqs,
       popularity: 82,
@@ -807,7 +808,7 @@ export function getSampleTrips(): Trip[] {
       paymentMode: "advance",
       advanceAmount: 3000,
       groupDiscount: { minPeople: 4, percent: 5 },
-      images: ["/images/trips/kedarkantha-himalayan-trek-1.svg", "/images/trips/kedarkantha-himalayan-trek-2.svg", "/images/trips/kedarkantha-himalayan-trek-3.svg"],
+      images: [P.snowGroup, P.snowWalkers, P.snowTrail],
       leaderIds: ["leader-3"],
       faqs: [
         { q: "I've never done a Himalayan trek. Can I do Kedarkantha?", a: "Yes, if you prepare. Many people do Kedarkantha as their first Himalayan trek. Follow the fitness plan we send and you'll enjoy it." },

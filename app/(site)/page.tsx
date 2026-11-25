@@ -1,33 +1,25 @@
 import Link from "next/link";
-import { BadgeIndianRupee, Bus, Compass, Search, ShieldPlus, Star, Users } from "lucide-react";
+import { ArrowRight, BadgeIndianRupee, Bus, Compass, ShieldPlus, Star, Users } from "lucide-react";
 import { getTrips } from "@/lib/data";
-import { batchDisplayStatus, dateRange, fromPrice, inr, monthKey, monthLabel, nextBatch, seatsLeft, toISODate, upcomingBatches } from "@/lib/format";
-import { compass, departureTime, fromPune } from "@/lib/geo";
-import { categories, hero, homeFaqs, instagramTiles, reviews, soloSteps, whyUs } from "@/data/content";
+import { batchDisplayStatus, nextBatch, seatsLeft, upcomingBatches } from "@/lib/format";
+import { departureTime } from "@/lib/geo";
+import { hero, homeFaqs, instagramTiles, reviews, soloSteps, whyUs } from "@/data/content";
+import { journeyScenes } from "@/data/journey";
+import { photos } from "@/data/photos";
 import { site, whatsappLink } from "@/site.config";
 import Img from "@/components/Img";
 import FaqList from "@/components/FaqList";
 import JsonLd from "@/components/JsonLd";
 import { InstagramIcon } from "@/components/SocialIcons";
 import { WhatsAppIcon } from "@/components/WhatsAppButton";
-import LiveHero, { type NextDeparture } from "@/components/home/LiveHero";
+import JourneyScroll from "@/components/home/JourneyScroll";
 import DepartureBoard, { type BoardRow } from "@/components/home/DepartureBoard";
-import TripRadar, { type RadarPoint } from "@/components/home/TripRadar";
-import SoloToCrew from "@/components/home/SoloToCrew";
 import OdometerStats from "@/components/home/OdometerStats";
+import TripPhotoCard from "@/components/home/TripPhotoCard";
 
 export const revalidate = 60;
 
 const whyIcons = { Compass, ShieldPlus, Users, Bus, BadgeIndianRupee };
-
-function nextMonths(n: number) {
-  const d = new Date();
-  return Array.from({ length: n }, (_, i) => {
-    const key = monthKey(toISODate(new Date(d.getFullYear(), d.getMonth() + i, 1)));
-    return { key, label: monthLabel(key) };
-  });
-}
-
 const IST = "Asia/Kolkata";
 const fmt = (d: Date, o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat("en-GB", { timeZone: IST, ...o }).format(d);
 
@@ -38,11 +30,19 @@ function boardName(name: string) {
   return words.join(" ").slice(0, 20);
 }
 
+const packages = [
+  { slug: "weekend-treks", title: "Weekend treks from Pune", text: "Sahyadri forts and trails, back by Sunday night." },
+  { slug: "night-treks", title: "Night treks", text: "Climb under the stars, watch sunrise from the top." },
+  { slug: "camping", title: "Lakeside camping", text: "Tents, bonfire and barbecue. No fitness needed." },
+  { slug: "backpacking", title: "Backpacking trips", text: "Hampi, Gokarna and more, 3–4 days with a group." },
+  { slug: "himalayan-treks", title: "Himalayan treks", text: "Your first snow summit, with a trained team." },
+];
+
 export default async function HomePage() {
   const trips = await getTrips();
   const now = Date.now();
 
-  // ---------- Departures (for the hero countdown and the board) ----------
+  // ---------- Departures ----------
   const departures = trips
     .flatMap((t) =>
       upcomingBatches(t).map((b) => {
@@ -54,9 +54,7 @@ export default async function HomePage() {
     .sort((a, b) => a.at.getTime() - b.at.getTime());
 
   const firstOpen = departures.find((d) => d.status !== "Waitlist");
-  const next: NextDeparture | null = firstOpen
-    ? { tripName: firstOpen.trip.name, href: `/book/${firstOpen.trip.slug}?batch=${firstOpen.batch.id}`, departAt: firstOpen.at.toISOString(), seatsLeft: seatsLeft(firstOpen.batch) }
-    : null;
+  const finalHref = firstOpen ? `/book/${firstOpen.trip.slug}?batch=${firstOpen.batch.id}` : "/treks";
 
   const board: BoardRow[] = departures.slice(0, 6).map((d) => ({
     id: d.batch.id,
@@ -69,27 +67,10 @@ export default async function HomePage() {
     href: `/book/${d.trip.slug}?batch=${d.batch.id}`,
   }));
 
-  // ---------- Radar ----------
-  const radar: RadarPoint[] = trips
-    .filter((t) => t.latitude != null && t.longitude != null)
-    .map((t) => {
-      const { km, bearing } = fromPune(t.latitude!, t.longitude!);
-      const nb = nextBatch(t);
-      return {
-        id: t.id,
-        name: t.name,
-        km,
-        bearing,
-        direction: compass(bearing),
-        difficulty: t.difficulty,
-        durationLabel: t.durationLabel,
-        image: t.images[0] ?? "",
-        next: nb ? `Next: ${dateRange(nb.startDate, nb.endDate)}` : "New dates coming soon",
-        price: inr(fromPrice(t)),
-        href: `/treks/${t.slug}`,
-        bookHref: nb ? `/book/${t.slug}?batch=${nb.id}` : `/treks/${t.slug}`,
-      };
-    });
+  // Featured trips: soonest departure first, one card per trip
+  const featured = [...trips]
+    .sort((a, b) => (nextBatch(a)?.startDate ?? "9999").localeCompare(nextBatch(b)?.startDate ?? "9999"))
+    .slice(0, 6);
 
   return (
     <>
@@ -106,195 +87,204 @@ export default async function HomePage() {
         }}
       />
 
-      {/* ---------- Live hero ---------- */}
-      <section className="relative">
-        <LiveHero headline={hero.headline} subheadline={hero.subheadline} next={next} />
-        <div className="container-site relative -mt-20 lg:-mt-24">
-          <form action="/treks" method="get" className="card grid gap-3 p-4 shadow-xl shadow-forest-900/10 sm:grid-cols-[1.4fr_1fr_1fr_auto] sm:items-end sm:p-5">
-            <div>
-              <label htmlFor="q" className="label">Where to?</label>
-              <input id="q" name="q" placeholder="Rajgad, Kalsubai, Hampi…" className="input" />
-            </div>
-            <div className="grid grid-cols-2 gap-3 sm:contents">
-              <div>
-                <label htmlFor="month" className="label">Month</label>
-                <select id="month" name="month" className="input" defaultValue="">
-                  <option value="">Any month</option>
-                  {nextMonths(6).map((m) => (
-                    <option key={m.key} value={m.key}>{m.label}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label htmlFor="type" className="label">Trip type</label>
-                <select id="type" name="type" className="input" defaultValue="">
-                  <option value="">All types</option>
-                  {categories.map((c) => (
-                    <option key={c.slug} value={c.slug}>{c.label}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <button type="submit" className="btn-forest h-[50px] px-6">
-              <Search size={18} /> Search trips
-            </button>
-          </form>
+      {/* ---------- The journey (scroll story) ---------- */}
+      <JourneyScroll scenes={journeyScenes} headline={hero.headline} subheadline={hero.subheadline} finalHref={finalHref} />
+
+      {/* ---------- Stats ---------- */}
+      <section id="trips" className="container-site scroll-mt-20 py-12 sm:py-16">
+        <OdometerStats stats={site.stats} />
+      </section>
+
+      {/* ---------- Featured trips ---------- */}
+      <section className="container-site">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="section-title">Unforgettable weekends, new friendships</h2>
+          <p className="mt-3 text-mountain-500">From one-day fort treks to Himalayan summits. Pick a date, choose your pickup, and you&apos;re in.</p>
+        </div>
+        <div className="rail mt-8 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-3">
+          {featured.map((t) => (
+            <TripPhotoCard key={t.id} trip={t} className="w-[80vw] max-w-[22rem] shrink-0 sm:w-auto sm:max-w-none" />
+          ))}
+        </div>
+        <div className="mt-8 text-center">
+          <Link href="/treks" className="btn-cta">
+            View all trips
+            <span className="btn-cta-icon"><ArrowRight size={18} /></span>
+          </Link>
         </div>
       </section>
 
       {/* ---------- Departure board ---------- */}
       {board.length > 0 && (
-        <section className="container-site mt-14">
-          <div className="mb-5 flex items-end justify-between gap-4">
+        <section className="container-site mt-20">
+          <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <h2 className="section-title">Leaving soon</h2>
               <p className="mt-1 text-mountain-500">Live seat count. Tap a departure to book your seat.</p>
             </div>
-            <Link href="/treks" className="hidden shrink-0 font-semibold text-forest-700 hover:text-forest-900 sm:block">
-              See all trips
-            </Link>
           </div>
           <DepartureBoard rows={board} />
         </section>
       )}
 
-      {/* ---------- Radar ---------- */}
-      {radar.length > 0 && (
-        <section className="container-site mt-20">
-          <h2 className="section-title">How far is your weekend?</h2>
-          <p className="mb-6 mt-1 max-w-xl text-mountain-500">Every trip plotted from Pune at its real distance and direction. Tap a dot to see the trip.</p>
-          <TripRadar points={radar} />
-        </section>
-      )}
-
-      {/* ---------- Categories ---------- */}
-      <section className="container-site mt-20">
-        <h2 className="section-title">Pick your kind of adventure</h2>
-        <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-3">
-          {categories.map((c, i) => (
-            <Link
-              key={c.slug}
-              href={c.slug === "corporate-trips" ? "/plan-a-trip?type=Corporate" : `/treks?type=${c.slug}`}
-              className={`group relative flex aspect-[4/3] items-end overflow-hidden rounded-card bg-forest-800 p-4 ${i === 0 ? "col-span-2 aspect-[2/1] lg:col-span-1 lg:aspect-[4/3]" : ""}`}
-            >
-              <Img src={c.image} alt="" sizes="(max-width: 640px) 50vw, 33vw" className="object-cover transition-transform duration-700 group-hover:scale-110" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-              <div className="relative transition-transform duration-300 group-hover:-translate-y-1">
-                <h3 className="text-lg font-bold leading-tight text-white sm:text-xl">{c.label}</h3>
-                <p className="mt-0.5 text-[13px] text-white/80 sm:text-sm">{c.blurb}</p>
-              </div>
-            </Link>
-          ))}
+      {/* ---------- Why us ---------- */}
+      <section className="mt-20 bg-mist py-16">
+        <div className="container-site">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="section-title">Why travel with us?</h2>
+            <p className="mt-3 text-mountain-500">Safety, good company and honest prices. That&apos;s why people come back.</p>
+          </div>
+          <ul className="mt-10 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-5">
+            {whyUs.map((w, i) => {
+              const Icon = whyIcons[w.icon];
+              const dark = i === 1;
+              return (
+                <li key={w.title} className={`flex flex-col items-center rounded-[1.25rem] p-5 text-center sm:p-6 ${dark ? "bg-forest-900 text-white" : "bg-white"} ${i === 4 ? "col-span-2 md:col-span-1" : ""}`}>
+                  <span className={`flex h-12 w-12 items-center justify-center rounded-full ${dark ? "bg-white/10 text-sunset-300" : "bg-forest-50 text-forest-700"}`}>
+                    <Icon size={22} />
+                  </span>
+                  <h3 className={`mt-4 text-[15px] font-bold leading-snug sm:text-base ${dark ? "text-white" : ""}`}>{w.title}</h3>
+                  <p className={`mt-1.5 text-[13px] leading-relaxed sm:text-sm ${dark ? "text-forest-200" : "text-mountain-500"}`}>{w.text}</p>
+                </li>
+              );
+            })}
+          </ul>
         </div>
       </section>
 
-      {/* ---------- Why us + stats ---------- */}
-      <section className="mt-20 bg-forest-800 py-16 text-white">
-        <div className="container-site">
-          <div className="grid gap-10 lg:grid-cols-[1fr_1.4fr]">
-            <div>
-              <h2 className="section-title text-white">Why travel with us</h2>
-              <p className="mt-3 max-w-md text-lg leading-relaxed text-forest-100">
-                You bring the energy. We handle the route, the transport, the food and the safety, so all you do is walk and enjoy.
-              </p>
+      {/* ---------- Packages ---------- */}
+      <section className="container-site mt-20">
+        <div className="grid gap-4 lg:grid-cols-[1.25fr_1fr]">
+          <div className="rounded-[1.5rem] bg-forest-900 p-6 sm:p-8">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="text-2xl font-bold text-white sm:text-3xl">Popular trip types</h2>
+              <Link href="/treks" className="rounded-full border border-white/25 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10">
+                View all
+              </Link>
             </div>
-            <ul className="grid gap-6 sm:grid-cols-2">
-              {whyUs.map((w) => {
-                const Icon = whyIcons[w.icon];
-                return (
-                  <li key={w.title} className="flex gap-4">
-                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white/10 text-sunset-300">
-                      <Icon size={22} />
+            <ul className="mt-6 divide-y divide-white/10">
+              {packages.map((p, i) => (
+                <li key={p.slug}>
+                  <Link href={`/treks?type=${p.slug}`} className="group flex items-center gap-4 py-4">
+                    <span className="w-7 shrink-0 text-sm font-semibold text-white/45">{String(i + 1).padStart(2, "0")}</span>
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-bold text-white">{p.title}</span>
+                      <span className="block text-sm text-forest-200">{p.text}</span>
                     </span>
-                    <div>
-                      <h3 className="font-display text-lg font-semibold text-white">{w.title}</h3>
-                      <p className="mt-1 text-[15px] leading-relaxed text-forest-200">{w.text}</p>
-                    </div>
-                  </li>
-                );
-              })}
+                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/25 text-white transition-colors group-hover:bg-white group-hover:text-forest-900">
+                      <ArrowRight size={18} />
+                    </span>
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
-          <div className="mt-14 border-t border-white/15 pt-10">
-            <OdometerStats stats={site.stats} />
+          <div className="relative flex min-h-[22rem] items-end overflow-hidden rounded-[1.5rem] bg-forest-800 p-5 sm:p-6">
+            <Img src={photos.sunriseSummit} alt="A trekker on a summit at sunrise" sizes="(max-width: 1024px) 100vw, 40vw" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+            <div className="relative w-full max-w-xs rounded-2xl bg-white p-5 shadow-xl">
+              <p className="text-xl font-bold leading-snug text-forest-900">Your weekend is waiting. Are you ready?</p>
+              <Link href="/treks" className="btn-cta mt-4">
+                Explore now
+                <span className="btn-cta-icon"><ArrowRight size={18} /></span>
+              </Link>
+            </div>
           </div>
         </div>
       </section>
 
       {/* ---------- Reviews ---------- */}
-      <section className="container-site mt-16">
-        <h2 className="section-title">What travellers say</h2>
-        <div className="rail mt-6">
+      <section className="container-site mt-20">
+        <h2 className="section-title text-center">What our travellers say</h2>
+        <div className="rail mt-8 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-4">
           {reviews.map((r, i) => (
-            <figure key={i} className="card flex w-[82vw] max-w-sm shrink-0 flex-col p-5">
-              <div className="flex gap-0.5 text-sunset-500" aria-label={`${r.rating} out of 5 stars`}>
+            <figure key={i} className="flex w-[80vw] max-w-sm shrink-0 flex-col rounded-[1.25rem] border border-mountain-100 bg-white p-5 sm:w-auto">
+              <div className="flex items-center gap-3">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-forest-100 font-bold text-forest-800">{r.name.replace(/[^A-Za-z]/g, "").charAt(0) || "T"}</span>
+                <figcaption className="text-sm">
+                  <span className="block font-bold text-forest-900">{r.name}</span>
+                  <span className="block text-mountain-500">{r.trip}</span>
+                </figcaption>
+              </div>
+              <div className="mt-4 flex gap-0.5 text-sunset-500" aria-label={`${r.rating} out of 5 stars`}>
                 {Array.from({ length: 5 }).map((_, k) => (
-                  <Star key={k} size={16} fill={k < r.rating ? "currentColor" : "none"} />
+                  <Star key={k} size={15} fill={k < r.rating ? "currentColor" : "none"} />
                 ))}
               </div>
-              <blockquote className="mt-3 flex-1 leading-relaxed text-mountain-700">{r.text}</blockquote>
-              <figcaption className="mt-4 text-sm">
-                <span className="font-semibold text-forest-900">{r.name}</span>
-                <span className="block text-mountain-500">{r.trip}</span>
-              </figcaption>
+              <blockquote className="mt-2 flex-1 text-[15px] leading-relaxed text-mountain-700">{r.text}</blockquote>
             </figure>
           ))}
         </div>
       </section>
 
-      {/* ---------- Solo → crew ---------- */}
-      <section className="container-site mt-16">
-        <div className="overflow-hidden rounded-[1.75rem] bg-[#0B1626] p-5 sm:p-10">
-          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <h2 className="section-title text-white">Travelling solo? You won&apos;t be for long.</h2>
-              <p className="mt-2 max-w-xl text-lg leading-relaxed text-forest-100/80">Most people on our trips come alone. Scroll and watch how that changes.</p>
-            </div>
+      {/* ---------- Solo travellers ---------- */}
+      <section className="container-site mt-20">
+        <div className="grid items-center gap-8 lg:grid-cols-2">
+          <div className="relative aspect-[4/3] overflow-hidden rounded-[1.5rem] bg-forest-800 lg:aspect-[5/4]">
+            <Img src={photos.groupOnHill} alt="A group of trekkers on a green hilltop" sizes="(max-width: 1024px) 100vw, 50vw" />
+            <span className="absolute bottom-4 left-4 rounded-full bg-white px-4 py-2 text-sm font-bold text-forest-900 shadow-lg">Most of our travellers join solo</span>
           </div>
-          <SoloToCrew steps={soloSteps} />
-          <div className="mt-6 flex flex-wrap gap-3">
-            <a href={site.whatsappCommunity} target="_blank" rel="noopener noreferrer" className="btn bg-[#25D366] text-white hover:bg-[#1fb757]">
-              <WhatsAppIcon className="h-5 w-5" /> Join our WhatsApp community
-            </a>
-            <a href={site.instagram} target="_blank" rel="noopener noreferrer" className="btn-ghost-light">
-              <InstagramIcon /> {site.instagramHandle}
-            </a>
+          <div>
+            <h2 className="section-title">Travelling solo? You won&apos;t be for long.</h2>
+            <p className="mt-3 text-lg leading-relaxed text-mountain-600">Here&apos;s how a stranger becomes a trek buddy by breakfast.</p>
+            <ol className="mt-6 space-y-3">
+              {soloSteps.map((s, i) => (
+                <li key={s.title} className="flex gap-4 rounded-2xl bg-mist p-4">
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-forest-900 text-sm font-bold text-white">{i + 1}</span>
+                  <div>
+                    <h3 className="font-bold">{s.title}</h3>
+                    <p className="mt-0.5 text-[15px] leading-relaxed text-mountain-600">{s.text}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <a href={site.whatsappCommunity} target="_blank" rel="noopener noreferrer" className="btn bg-[#25D366] text-white hover:bg-[#1fb757]">
+                <WhatsAppIcon className="h-5 w-5" /> Join our WhatsApp community
+              </a>
+              <a href={site.instagram} target="_blank" rel="noopener noreferrer" className="btn-outline">
+                <InstagramIcon /> {site.instagramHandle}
+              </a>
+            </div>
           </div>
         </div>
       </section>
 
       {/* ---------- Custom trips ---------- */}
-      <section className="container-site mt-16">
-        <div className="flex flex-col gap-5 rounded-card border border-mountain-100 bg-white p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
-          <div>
-            <h2 className="text-2xl font-bold sm:text-3xl">Planning for your office, college or family?</h2>
-            <p className="mt-2 max-w-xl text-mountain-600">Tell us your group size, dates and budget. We&apos;ll send a plan and a quote within a day.</p>
+      <section className="container-site mt-20">
+        <div className="relative overflow-hidden rounded-[1.5rem] bg-forest-900">
+          <Img src={photos.snowWalkers} alt="" sizes="100vw" />
+          <div className="absolute inset-0 bg-gradient-to-r from-forest-900/95 via-forest-900/75 to-forest-900/20" />
+          <div className="relative max-w-xl p-6 sm:p-10">
+            <h2 className="text-2xl font-bold text-white sm:text-4xl">Planning for your office, college or family?</h2>
+            <p className="mt-3 text-forest-100">Tell us your group size, dates and budget. We&apos;ll send a plan and a quote within a day.</p>
+            <Link href="/plan-a-trip" className="btn-cta-light mt-6">
+              Plan a custom trip
+              <span className="btn-cta-icon"><ArrowRight size={18} /></span>
+            </Link>
           </div>
-          <Link href="/plan-a-trip" className="btn-forest shrink-0 px-6">
-            Plan a custom trip
-          </Link>
         </div>
       </section>
 
       {/* ---------- Instagram ---------- */}
-      <section className="container-site mt-16">
-        <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+      <section className="container-site mt-20">
+        <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <h2 className="section-title">From the trail</h2>
           <a href={site.instagram} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 font-semibold text-forest-700 hover:text-forest-900">
             <InstagramIcon /> Follow {site.instagramHandle}
           </a>
         </div>
-        <div className="rail">
+        <div className="rail sm:mx-0 sm:grid sm:grid-cols-6 sm:overflow-visible sm:px-0">
           {instagramTiles.map((src, i) => (
-            <a key={i} href={site.instagram} target="_blank" rel="noopener noreferrer" className="relative aspect-square w-40 shrink-0 overflow-hidden rounded-2xl sm:w-48" aria-label="Open our Instagram">
-              <Img src={src} alt="" sizes="200px" />
+            <a key={i} href={site.instagram} target="_blank" rel="noopener noreferrer" className="relative aspect-square w-40 shrink-0 overflow-hidden rounded-2xl sm:w-auto" aria-label="Open our Instagram">
+              <Img src={src} alt="" sizes="(max-width: 640px) 160px, 16vw" className="object-cover transition-transform duration-500 hover:scale-105" />
             </a>
           ))}
         </div>
       </section>
 
       {/* ---------- FAQ ---------- */}
-      <section className="container-site mt-16 grid gap-8 lg:grid-cols-[1fr_1.6fr]">
+      <section className="container-site mt-20 grid gap-8 lg:grid-cols-[1fr_1.6fr]">
         <div>
           <h2 className="section-title">Questions, answered</h2>
           <p className="mt-3 text-mountain-600">Still unsure about something?</p>

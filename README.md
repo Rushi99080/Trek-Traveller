@@ -11,7 +11,7 @@ Built with Next.js, Tailwind CSS, Supabase (database) and Razorpay (payments). H
 
 | Page | Address |
 |---|---|
-| Home: live hero (sky follows the real time in Pune, countdown to the next group), split-flap departure board, "How far is your weekend?" radar from Pune, categories, why us with odometer stats, reviews, solo-to-crew campfire animation, Instagram, FAQ | `/` |
+| Home: scroll story (Pack → Ride → Arrive → Climb → Summit, each scene plays its clip as you scroll), stats, photo trip cards, departure board, why us, popular trip types, reviews, solo travellers, Instagram, FAQ | `/` |
 | All trips with filters and sorting | `/treks` |
 | Trip detail (gallery, batches, prices, itinerary, inclusions, packing list, pickup points, leaders, policy, FAQs, sticky Book Now bar) | `/treks/rajgad-fort-trek` |
 | Printable itinerary (Save as PDF) | `/treks/rajgad-fort-trek/itinerary` |
@@ -36,6 +36,8 @@ Also built in: Razorpay checkout (UPI, cards, net banking), full or advance paym
 |---|---|
 | Company name, logo, phone, WhatsApp number, email, address, social links, GSTIN, homepage numbers | `site.config.ts` |
 | Homepage text, categories, "why us", FAQs, reviews, cancellation policy, coupons for demo | `data/content.ts` |
+| Homepage scroll story: words, text, photos and character clips | `data/journey.ts` (how to make the clips: `JOURNEY-CLIPS.md`) |
+| Homepage photos | `data/photos.ts` |
 | Terms, privacy, cancellation and safety pages | `data/policies.ts` |
 | Brand colours | `tailwind.config.ts` |
 | Logo image | put `logo.png` in the `public` folder, then set `logo: "/logo.png"` in `site.config.ts` |
@@ -113,7 +115,6 @@ Vercel → **Project → Settings → Domains** → add `yourcompany.com` and fo
 Go to `yourwebsite.com/admin` and log in with `ADMIN_PASSWORD`.
 
 - **Add a trip:** Trips & batches → Add trip. Fill the sections, add batches, upload photos, Save. The trip appears on the website within a minute.
-- **Show a trip on the homepage radar:** in the trip's Basic details, fill **Map location** — on Google Maps, long-press the place and paste the numbers (e.g. `18.2465, 73.6823`).
 - **Copy a trip:** Duplicate creates a hidden copy without dates — edit it and tick "Show this trip on the website".
 - **Add dates:** open a trip → Batches → Add batch. Paste the trip WhatsApp group link on each batch; travellers get it after paying.
 - **Seats:** "Booked" goes up automatically after each payment. When a batch is full it switches to waitlist. Change "Booked" only to add offline bookings.
@@ -137,7 +138,8 @@ Go to `yourwebsite.com/admin` and log in with `ADMIN_PASSWORD`.
 - [ ] Real reviews in `data/content.ts` (don't publish made-up reviews)
 - [ ] Pickup spots and times for every trip (replace `[Pickup spot…]`)
 - [ ] Trek leader names, photos and bios (Admin → Trek leaders)
-- [ ] Real photos for every trip (the landscape drawings are placeholders)
+- [ ] Your own photos for every trip (current photos are free Unsplash placeholders)
+- [ ] The 5 character clips for the homepage story (see `JOURNEY-CLIPS.md`)
 - [ ] Policies and cancellation terms reviewed by your CA / lawyer
 - [ ] GSTIN, PAN and legal name for invoices
 - [ ] `ADMIN_PASSWORD` set

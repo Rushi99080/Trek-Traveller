@@ -171,17 +171,6 @@ export default function TripEditor({ initial, leaders, canUpload }: { initial: T
           <Field label="Region (used in filters)">
             <input className="input" value={t.region} onChange={(e) => set("region", e.target.value)} placeholder="e.g. Sahyadri – Pune" list="regions" />
           </Field>
-          <Field label="Map location (latitude, longitude)" hint="Google Maps: long-press the place, copy the numbers shown, paste here. Puts the trip on the homepage radar.">
-            <input
-              className="input"
-              defaultValue={t.latitude != null && t.longitude != null ? `${t.latitude}, ${t.longitude}` : ""}
-              onChange={(e) => {
-                const m = e.target.value.match(/(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/);
-                setT((p) => ({ ...p, latitude: m ? Number(m[1]) : null, longitude: m ? Number(m[2]) : null }));
-              }}
-              placeholder="18.2465, 73.6823"
-            />
-          </Field>
           <Field label="Difficulty">
             <select className="input" value={t.difficulty} onChange={(e) => set("difficulty", e.target.value as Trip["difficulty"])}>
               <option>Easy</option>

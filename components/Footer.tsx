@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Mail, MapPin, Phone } from "lucide-react";
 import Logo from "./Logo";
-import SummitRidge from "./SummitRidge";
+import { ArrowRight } from "lucide-react";
 import { site, whatsappLink } from "@/site.config";
 import { categories } from "@/data/content";
 import { FacebookIcon, InstagramIcon, YoutubeIcon } from "./SocialIcons";
@@ -11,8 +11,19 @@ export default function Footer() {
   const year = new Date().getFullYear();
   return (
     <footer className="no-print mt-20 text-forest-100">
-      <SummitRidge />
       <div className="bg-forest-900">
+      <div className="container-site pt-12">
+        <div className="flex flex-col gap-5 rounded-[1.5rem] bg-forest-800 p-6 sm:flex-row sm:items-center sm:justify-between sm:p-8">
+          <div>
+            <p className="text-2xl font-bold text-white sm:text-3xl">Let&apos;s explore the Sahyadris together</p>
+            <p className="mt-1 text-forest-200">Questions about a trip? We reply on WhatsApp within minutes.</p>
+          </div>
+          <a href={whatsappLink()} target="_blank" rel="noopener noreferrer" className="btn-cta-light shrink-0 self-start sm:self-auto">
+            Get in touch
+            <span className="btn-cta-icon"><ArrowRight size={18} /></span>
+          </a>
+        </div>
+      </div>
       <div className="container-site grid gap-10 py-14 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
         <div>
           <Logo light />

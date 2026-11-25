@@ -4,17 +4,18 @@
  * across the site. Keep the quotes " " around each piece of text.
  */
 import type { CategorySlug, Coupon } from "@/lib/types";
+import { photos as P } from "./photos";
 
 export const categories: { slug: CategorySlug; label: string; blurb: string; image: string }[] = [
-  { slug: "weekend-treks", label: "Weekend Treks", blurb: "Back by Sunday night", image: "/images/trips/rajgad-fort-trek-2.svg" },
-  { slug: "night-treks", label: "Night Treks", blurb: "Climb by headlamp, summit at sunrise", image: "/images/trips/kalsubai-night-trek-1.svg" },
-  { slug: "monsoon-treks", label: "Monsoon & Waterfall Treks", blurb: "Green trails, June to September", image: "/images/trips/andharban-jungle-trek-1.svg" },
-  { slug: "fort-treks", label: "Fort Treks", blurb: "Sahyadri forts and their stories", image: "/images/trips/rajgad-fort-trek-1.svg" },
-  { slug: "camping", label: "Camping", blurb: "Lakes, bonfires, starry skies", image: "/images/trips/pawna-lake-camping-1.svg" },
-  { slug: "backpacking", label: "Backpacking Trips", blurb: "Hampi, Gokarna and beyond", image: "/images/trips/hampi-backpacking-trip-1.svg" },
-  { slug: "himalayan-treks", label: "Himalayan Treks", blurb: "Snow summits and high camps", image: "/images/trips/kedarkantha-himalayan-trek-1.svg" },
-  { slug: "international-tours", label: "International Tours", blurb: "Group trips abroad", image: "/images/trips/international-1.svg" },
-  { slug: "corporate-trips", label: "Corporate Trips", blurb: "Offsites and team outings", image: "/images/trips/pawna-lake-camping-2.svg" },
+  { slug: "weekend-treks", label: "Weekend Treks", blurb: "Back by Sunday night", image: P.greenMountains },
+  { slug: "night-treks", label: "Night Treks", blurb: "Climb by headlamp, summit at sunrise", image: P.dryPeak },
+  { slug: "monsoon-treks", label: "Monsoon & Waterfall Treks", blurb: "Green trails, June to September", image: P.waterfall },
+  { slug: "fort-treks", label: "Fort Treks", blurb: "Sahyadri forts and their stories", image: P.fortRidge },
+  { slug: "camping", label: "Camping", blurb: "Lakes, bonfires, starry skies", image: P.tentsForest },
+  { slug: "backpacking", label: "Backpacking Trips", blurb: "Hampi, Gokarna and beyond", image: P.hampiChariot },
+  { slug: "himalayan-treks", label: "Himalayan Treks", blurb: "Snow summits and high camps", image: P.snowGroup },
+  { slug: "international-tours", label: "International Tours", blurb: "Group trips abroad", image: P.pinesSnow },
+  { slug: "corporate-trips", label: "Corporate Trips", blurb: "Offsites and team outings", image: P.groupOnHill },
 ];
 
 export function categoryLabel(slug: string) {
@@ -63,14 +64,7 @@ export const reviews = [
 ];
 
 /** Instagram strip on the homepage — replace with your own photos */
-export const instagramTiles = [
-  "/images/trips/rajgad-fort-trek-3.svg",
-  "/images/trips/kalsubai-night-trek-2.svg",
-  "/images/trips/pawna-lake-camping-3.svg",
-  "/images/trips/kedarkantha-himalayan-trek-2.svg",
-  "/images/trips/gokarna-beach-trek-1.svg",
-  "/images/trips/andharban-jungle-trek-2.svg",
-];
+export const instagramTiles = [P.groupOnHill, P.tentStars, P.waterfall, P.snowWalkers, P.gokarnaCliffs, P.fortRidge];
 
 /**
  * CANCELLATION & REFUND POLICY — placeholder terms.

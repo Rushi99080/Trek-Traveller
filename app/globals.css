@@ -8,18 +8,17 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply bg-mist font-sans text-mountain-800 antialiased;
+    @apply bg-white font-sans text-mountain-800 antialiased;
   }
   h1,
   h2,
   h3,
   h4 {
     @apply font-display text-forest-900;
-    font-variation-settings: "wdth" 100;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.025em;
   }
   :focus-visible {
-    @apply outline-none ring-2 ring-sunset-500 ring-offset-2 ring-offset-mist;
+    @apply outline-none ring-2 ring-sunset-500 ring-offset-2 ring-offset-white;
   }
   summary {
     cursor: pointer;
@@ -48,6 +47,25 @@
   .btn-ghost-light {
     @apply btn border border-white/50 bg-white/10 text-white backdrop-blur hover:bg-white/20;
   }
+  /* Dark pill with a white arrow circle (main call to action) */
+  .btn-cta {
+    @apply inline-flex items-center gap-4 rounded-full bg-forest-900 py-1.5 pl-6 pr-1.5 text-[13px] font-bold uppercase tracking-wide text-white transition-colors hover:bg-forest-800;
+  }
+  .btn-cta-icon {
+    @apply flex h-10 w-10 items-center justify-center rounded-full bg-white text-forest-900 transition-transform;
+  }
+  .btn-cta:hover .btn-cta-icon {
+    @apply translate-x-0.5;
+  }
+  .btn-cta-light {
+    @apply inline-flex items-center gap-4 rounded-full bg-white py-1.5 pl-6 pr-1.5 text-[13px] font-bold uppercase tracking-wide text-forest-900 transition-colors hover:bg-forest-50;
+  }
+  .btn-cta-light .btn-cta-icon {
+    @apply bg-forest-900 text-white;
+  }
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.18em] text-mountain-400;
+  }
   .card {
     @apply rounded-card border border-mountain-100 bg-white;
   }
@@ -58,7 +76,7 @@
     @apply mb-1.5 block text-sm font-medium text-mountain-700;
   }
   .section-title {
-    @apply text-[1.75rem] font-bold leading-tight sm:text-4xl;
+    @apply text-[1.75rem] font-bold leading-tight sm:text-[2.5rem];
   }
   .rail {
     @apply -mx-4 flex snap-x snap-mandatory scroll-px-4 gap-4 overflow-x-auto px-4 pb-2 sm:-mx-6 sm:scroll-px-6 sm:px-6 lg:-mx-8 lg:scroll-px-8 lg:px-8;

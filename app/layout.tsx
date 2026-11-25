@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import "@fontsource-variable/bricolage-grotesque";
-import "@fontsource-variable/figtree";
+import "@fontsource-variable/plus-jakarta-sans";
 import "./globals.css";
 import { site } from "@/site.config";
 import Analytics from "@/components/Analytics";

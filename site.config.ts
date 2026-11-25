@@ -12,6 +12,8 @@ export const site = {
   name: "[COMPANY NAME]",
   shortName: "[COMPANY]",
   tagline: "Group treks and trips from Pune & Mumbai",
+  // Small line under the company name in the header
+  logoTagline: "Treks, camps & trips",
   description:
     "Weekend treks, night treks, monsoon waterfall trails, fort treks, camping, backpacking, Himalayan treks and international tours from Pune and Mumbai. Join solo or bring your group.",
 

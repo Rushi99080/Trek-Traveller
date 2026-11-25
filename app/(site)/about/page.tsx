@@ -4,6 +4,7 @@ import { UserRound } from "lucide-react";
 import { getLeaders } from "@/lib/data";
 import { site } from "@/site.config";
 import Img from "@/components/Img";
+import { photos } from "@/data/photos";
 
 export const revalidate = 300;
 
@@ -27,7 +28,7 @@ export default async function AboutPage() {
   return (
     <>
       <div className="relative h-64 overflow-hidden bg-forest-900 sm:h-80">
-        <Img src="/images/trips/kalsubai-night-trek-2.svg" alt="A group of trekkers on a Sahyadri ridge at sunrise" sizes="100vw" priority />
+        <Img src={photos.groupOnHill} alt="A group of trekkers on a green hilltop" sizes="100vw" priority />
         <div className="absolute inset-0 bg-gradient-to-t from-forest-900/80 to-transparent" />
         <div className="container-site relative flex h-full items-end pb-8">
           <h1 className="text-4xl font-extrabold text-white sm:text-5xl">About {site.name}</h1>
