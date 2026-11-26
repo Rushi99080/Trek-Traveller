@@ -23,9 +23,8 @@ export function categoryLabel(slug: string) {
 }
 
 export const hero = {
-  headline: "Come solo. Leave with a crew.",
-  subheadline:
-    "Weekend treks, night treks and lakeside camps from Pune & Mumbai — trek leaders, transport and food sorted.",
+  // Shown at the top of the homepage (also the main heading for Google)
+  headline: "Weekend treks and trips from Pune & Mumbai",
 };
 
 export const whyUs = [

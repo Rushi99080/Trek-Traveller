@@ -11,7 +11,7 @@ Built with Next.js, Tailwind CSS, Supabase (database) and Razorpay (payments). H
 
 | Page | Address |
 |---|---|
-| Home: scroll story (Pack → Ride → Arrive → Climb → Summit, each scene plays its clip as you scroll), stats, photo trip cards, departure board, why us, popular trip types, reviews, solo travellers, Instagram, FAQ | `/` |
+| Home: upcoming-trips photo slider, search, pick-a-weekend planner, trips by type, a day on the trail (real itinerary + what's included), why us, solo travellers, reviews, Instagram, FAQ | `/` |
 | All trips with filters and sorting | `/treks` |
 | Trip detail (gallery, batches, prices, itinerary, inclusions, packing list, pickup points, leaders, policy, FAQs, sticky Book Now bar) | `/treks/rajgad-fort-trek` |
 | Printable itinerary (Save as PDF) | `/treks/rajgad-fort-trek/itinerary` |
@@ -36,7 +36,6 @@ Also built in: Razorpay checkout (UPI, cards, net banking), full or advance paym
 |---|---|
 | Company name, logo, phone, WhatsApp number, email, address, social links, GSTIN, homepage numbers | `site.config.ts` |
 | Homepage text, categories, "why us", FAQs, reviews, cancellation policy, coupons for demo | `data/content.ts` |
-| Homepage scroll story: words, text, photos and character clips | `data/journey.ts` (how to make the clips: `JOURNEY-CLIPS.md`) |
 | Homepage photos | `data/photos.ts` |
 | Terms, privacy, cancellation and safety pages | `data/policies.ts` |
 | Brand colours | `tailwind.config.ts` |
@@ -139,7 +138,6 @@ Go to `yourwebsite.com/admin` and log in with `ADMIN_PASSWORD`.
 - [ ] Pickup spots and times for every trip (replace `[Pickup spot…]`)
 - [ ] Trek leader names, photos and bios (Admin → Trek leaders)
 - [ ] Your own photos for every trip (current photos are free Unsplash placeholders)
-- [ ] The 5 character clips for the homepage story (see `JOURNEY-CLIPS.md`)
 - [ ] Policies and cancellation terms reviewed by your CA / lawyer
 - [ ] GSTIN, PAN and legal name for invoices
 - [ ] `ADMIN_PASSWORD` set
